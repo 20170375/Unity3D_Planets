@@ -11,7 +11,7 @@ public class ControlPanel : MonoBehaviour, IPointerDownHandler
 
     [Header("Camera Control")]
     [SerializeField] private Transform cam;
-    [SerializeField] private float distance;            // Ä«¸Þ¶ó¿Í targetÀÇ °Å¸®
+    [SerializeField] private float distance;            // Ä«ï¿½Þ¶ï¿½ï¿½ targetï¿½ï¿½ ï¿½Å¸ï¿½
     private Vector3 prePosition;
 
     [Header("Planet Info Panel")]
@@ -64,7 +64,7 @@ public class ControlPanel : MonoBehaviour, IPointerDownHandler
     }
 
     /// <summary>
-    /// Çà¼º Á¤º¸ ÆÐ³Î ¾÷µ¥ÀÌÆ®
+    /// ï¿½à¼º ï¿½ï¿½ï¿½ï¿½ ï¿½Ð³ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
     /// </summary>
     private void UpdatePlanetInfo()
     {
@@ -85,9 +85,6 @@ public class ControlPanel : MonoBehaviour, IPointerDownHandler
         cam.position = Vector3.Lerp(cam.position, cam.rotation * new Vector3(0, 0, -distance) + target.position, 5*Time.deltaTime);
     }
 
-    /// <summary>
-    /// https://emmaprats.com/p/how-to-rotate-the-camera-around-an-object-in-unity3d/
-    /// </summary>
     private void Rotate()
     {
         if ( Input.GetMouseButtonDown(0) )
