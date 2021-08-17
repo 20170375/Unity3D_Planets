@@ -6,18 +6,23 @@ using UnityEngine.EventSystems;
 
 public class ControlPanel : MonoBehaviour, IPointerDownHandler
 {
+    public static ControlPanel Instance { private set; get; }
+    private void Awake() => Instance = this;
+
     [SerializeField] private Transform target;
     private Transform target0;
 
     [Header("Camera Control")]
     [SerializeField] private Transform cam;
-    [SerializeField] private float distance;            // ī�޶�� target�� �Ÿ�
+    [SerializeField] private float distance;            // 카메라와 target과의 거리
     private Vector3 prePosition;
 
     [Header("Planet Info Panel")]
     [SerializeField] private GameObject planetInfoPanel;
     [SerializeField] private Text       planetNameText;
     [SerializeField] private Text       planetInfoText;
+
+    public Transform Target { get => target; }
 
     private void Start()
     {
@@ -26,13 +31,9 @@ public class ControlPanel : MonoBehaviour, IPointerDownHandler
 
     private void Update()
     {
-        
-    }
-
-    private void LateUpdate()
-    {
         Zoom();
         Rotate();
+        UpdatePlanetInfo();
     }
 
     public void OnPointerDown(PointerEventData eventData)
@@ -45,11 +46,7 @@ public class ControlPanel : MonoBehaviour, IPointerDownHandler
             {
                 if ( (target != hit.transform) && (target0 == hit.transform) )
                 {
-                    target   = target0;
-                    target0  = null;
-                    distance = target.localScale.x;
-
-                    UpdatePlanetInfo();
+                    SetTarget(target0);
                 }
                 else
                 {
@@ -64,7 +61,7 @@ public class ControlPanel : MonoBehaviour, IPointerDownHandler
     }
 
     /// <summary>
-    /// �༺ ���� �г� ������Ʈ
+    /// 행성 정보 패널 업데이트
     /// </summary>
     private void UpdatePlanetInfo()
     {
@@ -72,11 +69,17 @@ public class ControlPanel : MonoBehaviour, IPointerDownHandler
 
         Planet planet       = target.GetComponent<Planet>();
         planetNameText.text = planet.PlanetName;
-        planetInfoText.text = string.Format("{0}   radius: {1}", planet.transform.position, planet.transform.localScale.x);
+        planetInfoText.text = string.Format("{0:0.0}   radius: {1:.0}   mass: {2:.0}",
+            planet.transform.position, planet.transform.localScale.x, planet.PlanetMass);
     }
 
+    /// <summary>
+    /// 카메라 줌 In/Out
+    /// </summary>
     private void Zoom()
     {
+        if ( target == null ) { return; }
+
         distance -= Input.GetAxis("Mouse ScrollWheel") * 1000 * target.localScale.x * Time.deltaTime;
         float minDistance = 60   * target.localScale.x / 100;
         float maxDistance = 1000 * target.localScale.x / 100;
@@ -85,8 +88,13 @@ public class ControlPanel : MonoBehaviour, IPointerDownHandler
         cam.position = Vector3.Lerp(cam.position, cam.rotation * new Vector3(0, 0, -distance) + target.position, 5*Time.deltaTime);
     }
 
+    /// <summary>
+    /// 카메라 회전
+    /// </summary>
     private void Rotate()
     {
+        if (target == null) { return; }
+
         if ( Input.GetMouseButtonDown(0) )
         {
             prePosition = cam.GetComponent<Camera>().ScreenToViewportPoint(Input.mousePosition);
@@ -108,5 +116,24 @@ public class ControlPanel : MonoBehaviour, IPointerDownHandler
 
             prePosition = curPosition;
         }
+    }
+
+    /// <summary>
+    /// Set target to control (call outside)
+    /// </summary>
+    public void SetTarget(Transform _target)
+    {
+        if ( _target == null )
+        {
+            List<Planet> planets = new List<Planet>(PlanetManager.Instance.Planets);
+            planets.Sort(
+                (a, b) => Vector3.Distance(cam.position, a.transform.position).CompareTo(Vector3.Distance(cam.position, b.transform.position))
+                );
+            _target = planets[0].transform;
+        }
+
+        target   = _target;
+        target0  = null;
+        distance = target.localScale.x;
     }
 }
