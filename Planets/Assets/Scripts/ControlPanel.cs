@@ -70,7 +70,7 @@ public class ControlPanel : MonoBehaviour, IPointerDownHandler
         Planet planet       = target.GetComponent<Planet>();
         planetNameText.text = planet.PlanetName;
         planetInfoText.text = string.Format("{0:0.0}   radius: {1:.0}   mass: {2:.0}",
-            planet.transform.position, planet.transform.localScale.x, planet.PlanetMass);
+            planet.transform.position, planet.transform.localScale.x/2, planet.PlanetMass);
     }
 
     /// <summary>
