@@ -32,11 +32,25 @@ public class Planet : MonoBehaviour
     private void Rotate() => transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(transform.rotation.eulerAngles + rotate), rotateSpeed*Time.deltaTime);
 
     /// <summary>
+    /// 새로운 행성 생성시 초기 설정 메소드
+    /// </summary>
+    public void Setup(string _planetName, float _planetMass)
+    {
+        planetName = _planetName;
+        planetMass = _planetMass;
+        name       = planetName;
+    }
+
+    /// <summary>
     /// 행성의 성장 (크기/질량/회전에 영향)
     /// </summary>
     public void PlanetExtend(float mass)
     {
         transform.localScale *= Mathf.Sqrt((planetMass+mass) / planetMass);
+        for ( int i=0; i<transform.childCount; ++i )
+        {
+            transform.GetChild(i).localScale *= Mathf.Sqrt((planetMass + mass) / planetMass);
+        }
         planetMass += mass;
 
         rotate = Random.insideUnitSphere;
