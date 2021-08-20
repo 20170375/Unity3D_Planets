@@ -91,17 +91,15 @@ public class PlanetManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 货肺款 青己 积己 滚瓢
+    /// 货肺款 青己 积己
     /// </summary>
-    public void NewPlanetBtn()
+    public void NewPlanet(string _name, float _radius, float _mass)
     {
         GameObject planet = Instantiate(planetPrefab, transform);
         planet.GetComponent<MeshRenderer>().material.color = Random.ColorHSV();
+        planet.GetComponent<Planet>().Setup(_name, _mass);
         planet.transform.position   = Random.insideUnitSphere * range;
-        planet.transform.localScale = Vector3.one * Random.Range(minRadius, maxRadius) * 2;
-        string planetName = "Planet" + Random.Range(0, 100);
-        float  planetMass = Random.Range(minMass, maxMass);
-        planet.GetComponent<Planet>().Setup(planetName, planetMass);
+        planet.transform.localScale = Vector3.one * _radius * 2;
 
         planets.Add(planet.GetComponent<Planet>());
     }

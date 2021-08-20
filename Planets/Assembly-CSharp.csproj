@@ -56,7 +56,6 @@
     <Compile Include="Assets\Scripts\PlanetManager.cs" />
     <Compile Include="Assets\Scripts\ControlPanel.cs" />
     <Compile Include="Assets\Scripts\Planet.cs" />
-    <Compile Include="Assets\Scripts\HideBtn.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

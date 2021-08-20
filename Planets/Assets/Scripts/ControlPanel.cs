@@ -22,6 +22,16 @@ public class ControlPanel : MonoBehaviour, IPointerDownHandler
     [SerializeField] private Text       planetNameText;
     [SerializeField] private Text       planetInfoText;
 
+    [Header("New Planet Panel")]
+    [SerializeField] private GameObject newPlanetPanel;
+    [SerializeField] private InputField nameInput;
+    [SerializeField] private Scrollbar  radiusScrollbar;
+    [SerializeField] private Scrollbar  massScrollbar;
+    [SerializeField] private float      minRadius;
+    [SerializeField] private float      maxRadius;
+    [SerializeField] private float      minMass;
+    [SerializeField] private float      maxMass;
+
     public Transform Target { get => target; }
 
     private void Start()
@@ -138,19 +148,38 @@ public class ControlPanel : MonoBehaviour, IPointerDownHandler
     }
 
     /// <summary>
-    /// 행성 정보 숨기기 버튼
+    /// UI 숨기기 버튼
     /// </summary>
-    public void HideBtn(Text hideBtnText)
+    public void HideBtn(RectTransform self)
     {
-        if (hideBtnText.text == "<<" )
+        float angle = self.rotation.eulerAngles.z;
+        if ( angle == 0f )
         {
-            hideBtnText.text = ">>";
-            planetInfoText.transform.position += new Vector3(-810, 0, 0);
+            self.parent.position += new Vector3(0, -(self.parent.GetComponent<RectTransform>().rect.height + 10), 0);
         }
-        else
+        else if ( angle == 270f )
         {
-            hideBtnText.text = "<<";
-            planetInfoText.transform.position += new Vector3(810, 0, 0);
+            self.parent.position += new Vector3(-(self.parent.GetComponent<RectTransform>().rect.width + 10), 0, 0);
         }
+        else if ( angle == 180f )
+        {
+            self.parent.position += new Vector3(0, (self.parent.GetComponent<RectTransform>().rect.height + 10), 0);
+        }
+        else if ( angle == 90f )
+        {
+            self.parent.position += new Vector3((self.parent.GetComponent<RectTransform>().rect.width + 10), 0, 0);
+        }
+        self.rotation = Quaternion.Euler(0, 0, angle - 180);
+    }
+
+    /// <summary>
+    /// 새로운 행성 생성 버튼
+    /// </summary>
+    public void NewPlanetBtn()
+    {
+        string newName   = nameInput.text != "" ? nameInput.text : "Planet" + Random.Range(0, 1000);
+        float  newRadius = Mathf.Max(minRadius, radiusScrollbar.value * maxRadius);
+        float  newMass   = Mathf.Max(minMass, massScrollbar.value * maxMass);
+        PlanetManager.Instance.NewPlanet(newName, newRadius, newMass);
     }
 }
