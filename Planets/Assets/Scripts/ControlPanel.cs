@@ -136,4 +136,21 @@ public class ControlPanel : MonoBehaviour, IPointerDownHandler
         target0  = null;
         distance = target.localScale.x;
     }
+
+    /// <summary>
+    /// 행성 정보 숨기기 버튼
+    /// </summary>
+    public void HideBtn(Text hideBtnText)
+    {
+        if (hideBtnText.text == "<<" )
+        {
+            hideBtnText.text = ">>";
+            planetInfoText.transform.position += new Vector3(-810, 0, 0);
+        }
+        else
+        {
+            hideBtnText.text = "<<";
+            planetInfoText.transform.position += new Vector3(810, 0, 0);
+        }
+    }
 }
