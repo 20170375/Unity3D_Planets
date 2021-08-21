@@ -14,7 +14,7 @@ public class ControlPanel : MonoBehaviour, IPointerDownHandler
 
     [Header("Camera Control")]
     [SerializeField] private Transform cam;
-    [SerializeField] private float distance;            // 카메라와 target과의 거리
+    [SerializeField] private float distance; // 카메라와 target과의 거리
     private Vector3 prePosition;
 
     [Header("Planet Info Panel")]
@@ -34,8 +34,18 @@ public class ControlPanel : MonoBehaviour, IPointerDownHandler
 
     public Transform Target { get => target; }
 
+
     private void Start()
     {
+        // 임의로 10개 행성 추가
+        for ( int i=0; i<50; ++i )
+        {
+            string newName  = "Planet0" + Random.Range(0, 1000);
+            float newRadius = Random.Range(minRadius, maxRadius);
+            float newMass   = Mathf.Min(newRadius * 1.2f, maxMass);
+            PlanetManager.Instance.NewPlanet(newName, newRadius, newMass);
+        }
+
         UpdatePlanetInfo();
     }
 
@@ -103,7 +113,7 @@ public class ControlPanel : MonoBehaviour, IPointerDownHandler
     /// </summary>
     private void Rotate()
     {
-        if (target == null) { return; }
+        if ( target == null ) { return; }
 
         if ( Input.GetMouseButtonDown(0) )
         {
@@ -138,7 +148,7 @@ public class ControlPanel : MonoBehaviour, IPointerDownHandler
             List<Planet> planets = new List<Planet>(PlanetManager.Instance.Planets);
             planets.Sort(
                 (a, b) => Vector3.Distance(cam.position, a.transform.position).CompareTo(Vector3.Distance(cam.position, b.transform.position))
-                );
+            );
             _target = planets[0].transform;
         }
 
@@ -177,7 +187,7 @@ public class ControlPanel : MonoBehaviour, IPointerDownHandler
     /// </summary>
     public void NewPlanetBtn()
     {
-        string newName   = nameInput.text != "" ? nameInput.text : "Planet" + Random.Range(0, 1000);
+        string newName   = nameInput.text != "" ? nameInput.text : "Planet0" + Random.Range(0, 1000);
         float  newRadius = Mathf.Max(minRadius, radiusScrollbar.value * maxRadius);
         float  newMass   = Mathf.Max(minMass, massScrollbar.value * maxMass);
         PlanetManager.Instance.NewPlanet(newName, newRadius, newMass);

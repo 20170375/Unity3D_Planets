@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlanetManager : MonoBehaviour
 {
@@ -10,19 +11,19 @@ public class PlanetManager : MonoBehaviour
     [Header("Create")]
     [SerializeField] private GameObject  planetPrefab;
     [SerializeField] private float       range;
-    [SerializeField] private float       minMass;
-    [SerializeField] private float       maxMass;
-    [SerializeField] private float       minRadius;
-    [SerializeField] private float       maxRadius;
     
     [Header("Management")]
     [SerializeField] private List<Planet> planets;
     [SerializeField] private float        massPerDist;
-    [SerializeField] private float        gravityConst = 0.01f;
+    [SerializeField] private float        gravityConst = 0.1f;
 
-    private List<Planet> planetsToDie = new List<Planet>();
+    [Header("UI")]
+    [SerializeField] private Scrollbar speedScrollbar;
+
+    private List<Planet> planetsDead = new List<Planet>();
 
     public List<Planet> Planets { get => planets; }
+
 
     private void LateUpdate()
     {
@@ -40,18 +41,15 @@ public class PlanetManager : MonoBehaviour
                 }
                 if ( distance >= massPerDist )
                 {
-                    planet.transform.Translate(direction * gravityConst * planet.PlanetMass * other.PlanetMass / Mathf.Pow(distance, 2));
+                    planet.transform.Translate(direction * gravityConst * other.PlanetMass / Mathf.Pow(distance, 2) *
+                        Mathf.Pow(speedScrollbar.value*100, 3));
                 }
             }
         }
 
         // 사망한 행성 처리
-        foreach ( Planet planet in planetsToDie )
-        {
-            planets.Remove(planet);
-            Destroy(planet.gameObject);
-        }
-        planetsToDie.Clear();
+        planetsDead.ForEach(x => planets.Remove(x));
+        planetsDead.ForEach(x => x.gameObject.SetActive(false));
     }
 
     /// <summary>
@@ -63,7 +61,9 @@ public class PlanetManager : MonoBehaviour
         if ( planet1.PlanetMass >= planet2.PlanetMass*1.5f )
         {
             planet1.PlanetExtend(planet2.PlanetMass * 0.7f);
-            planetsToDie.Add(planet2);
+            planetsDead.Add(planet2);
+            EffectPool.Instance.CrashEffect(planet2.transform.position, planet2.transform.localScale.x / 2);
+
             if ( planet2.transform == ControlPanel.Instance.Target ) { ControlPanel.Instance.SetTarget(planet1.transform); }
 
             Debug.Log(planet1.PlanetName + " eats " + planet2.PlanetName);
@@ -72,7 +72,9 @@ public class PlanetManager : MonoBehaviour
         else if ( planet2.PlanetMass >= planet1.PlanetMass*1.5f )
         {
             planet2.PlanetExtend(planet1.PlanetMass * 0.7f);
-            planetsToDie.Add(planet1);
+            planetsDead.Add(planet1);
+            EffectPool.Instance.CrashEffect(planet1.transform.position, planet1.transform.localScale.x / 2);
+
             if ( planet1.transform == ControlPanel.Instance.Target ) { ControlPanel.Instance.SetTarget(planet2.transform); }
 
             Debug.Log(planet2.PlanetName + " eats " + planet1.PlanetName);
@@ -80,8 +82,10 @@ public class PlanetManager : MonoBehaviour
         // 두 행성간 질량이 비슷한 경우: 모두 소멸
         else
         {
-            planetsToDie.Add(planet1);
-            planetsToDie.Add(planet2);
+            planetsDead.Add(planet1);
+            planetsDead.Add(planet2);
+            Planet bigger = planet1.PlanetMass > planet2.PlanetMass ? planet1 : planet2;
+            EffectPool.Instance.CrashEffect(bigger.transform.position, bigger.transform.localScale.x / 2);
 
             if ( (planet1.transform == ControlPanel.Instance.Target) || (planet2.transform == ControlPanel.Instance.Target) )
             {
@@ -95,7 +99,18 @@ public class PlanetManager : MonoBehaviour
     /// </summary>
     public void NewPlanet(string _name, float _radius, float _mass)
     {
-        GameObject planet = Instantiate(planetPrefab, transform);
+        GameObject planet;
+        if ( planetsDead.Count != 0 )
+        {
+            Planet dead = planetsDead[0];
+            planetsDead.Remove(dead);
+            planet = dead.gameObject;
+            planet.SetActive(true);
+        }
+        else
+        {
+            planet = Instantiate(planetPrefab, transform);
+        }
         planet.GetComponent<MeshRenderer>().material.color = Random.ColorHSV();
         planet.GetComponent<Planet>().Setup(_name, _mass);
         planet.transform.position   = Random.insideUnitSphere * range;
