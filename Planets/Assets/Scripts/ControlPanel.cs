@@ -37,8 +37,8 @@ public class ControlPanel : MonoBehaviour, IPointerDownHandler
 
     private void Start()
     {
-        // 임의로 10개 행성 추가
-        for ( int i=0; i<50; ++i )
+        // 임의로 100개 행성 추가
+        for ( int i=0; i<100; ++i )
         {
             string newName  = "Planet0" + Random.Range(0, 1000);
             float newRadius = Random.Range(minRadius, maxRadius);
